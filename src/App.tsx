@@ -331,14 +331,20 @@ function ImageCarousel({ slides, variant }: { slides: BannerSlide[]; variant: "h
 function Home({ c }: { c: Ctx }) {
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<"Todos" | Cat>("Todos");
-  const list = useMemo(() => PRODUCTS.filter((p) => (cat === "Todos" || p.category === cat) && p.name.toLowerCase().includes(q.toLowerCase())), [q, cat]);
+
+  // Filtra normalmente com base na busca e categoria
+  const filteredList = useMemo(() => PRODUCTS.filter((p) => (cat === "Todos" || p.category === cat) && p.name.toLowerCase().includes(q.toLowerCase())), [q, cat]);
+  
+  // Limita a apenas 4 produtos quando não há busca ativa e a categoria selecionada é "Todos"
+  const list = useMemo(() => (!q && cat === "Todos") ? filteredList.slice(0, 4) : filteredList, [filteredList, q, cat]);
+
   const promos = PRODUCTS.filter((p) => off(p) > 0);
   return (
     <>
       <header className="hero">
-        
+        <p>Olá! 👋</p>
         <div className="hero-brand">
-          <img className="brand-logo" src="/assets/logo.png" alt="" aria-hidden="true" />
+          <img className="brand-logo" src="./assets/logo.png" alt="" aria-hidden="true" />
           <h1>Beleza Segura</h1>
         </div>
         <span>Compre com confiança em links oficiais.</span>
@@ -364,7 +370,6 @@ function Home({ c }: { c: Ctx }) {
     </>
   );
 }
-
 function Discover({ c }: { c: Ctx }) {
   const [sort, setSort] = useState<"rating" | "low" | "high" | "off">("rating");
   const list = useMemo(() => [...PRODUCTS].sort((a, b) => sort === "rating" ? b.rating - a.rating : sort === "low" ? a.price - b.price : sort === "high" ? b.price - a.price : off(b) - off(a)), [sort]);
