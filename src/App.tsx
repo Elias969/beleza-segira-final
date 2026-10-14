@@ -526,7 +526,7 @@ function ProfileScreen({ c, user, logout }: { c: Ctx; user: User; logout: () => 
   );
 }
 
-function Auth({ mode, setMode, onAuth }: { mode: "login" | "signup"; setMode: (m: "login" | "signup") => void; onAuth: (u: User) => void }) {
+function Auth({ mode, setMode, onAuth, onGuest }: { mode: "login" | "signup"; setMode: (m: "login" | "signup") => void; onAuth: (u: User) => void; onGuest: () => void; }) {
   const [name, setName] = useState(""); const [email, setEmail] = useState(""); const [pw, setPw] = useState(""); const [err, setErr] = useState("");
   const submit = () => {
     if (mode === "signup" && name.trim().length < 2) return setErr("Informe seu nome.");
@@ -555,6 +555,14 @@ function Auth({ mode, setMode, onAuth }: { mode: "login" | "signup"; setMode: (m
         <input className="input" type="password" placeholder="Senha" value={pw} onChange={(e) => setPw(e.target.value)} onKeyDown={(e) => e.key === "Enter" && submit()} />
         {err && <p className="err" role="alert">{err}</p>}
         <button className="btn-primary w-full" onClick={submit}>{mode === "login" ? "Entrar" : "Cadastrar"}</button>
+        
+<button
+  type="button"
+  className="guest-entry"
+  onClick={onGuest}
+>
+  Entrar sem login
+</button>
         <p className="switch">{mode === "login" ? "Não tem conta? " : "Já tem conta? "}<button onClick={() => { setErr(""); setMode(mode === "login" ? "signup" : "login"); }}>{mode === "login" ? "Cadastre-se" : "Entrar"}</button></p>
       </div>
     </main>
@@ -589,6 +597,10 @@ export default function App() {
   const c: Ctx = { favs, toggleFav, go, back, toast: setMsg };
   const auth = (u: User) => { save("bs_user", u); setUser(u); setScreen("home"); };
   const logout = () => { save("bs_user", null); setUser(null); };
+  const enterGuest = () => {
+  setUser({ name: "Visitante", email: "Acesso sem conta" });
+  setScreen("home");
+};
 
   let body: React.ReactNode;
   if (screen === "detail" && product) body = <Detail p={product} c={c} />;
@@ -601,7 +613,7 @@ export default function App() {
   return (
     <div className="app-wrapper">
       <div className="mobile-container">
-        {!user ? <Auth mode={authMode} setMode={setAuthMode} onAuth={auth} /> : (
+        {!user ? <Auth mode={authMode} setMode={setAuthMode} onAuth={auth} onGuest={enterGuest} /> : (
           <>
             <div id="scroller" className="scroller"><div key={screen} className="screen fade-in">{body}</div></div>
             <BottomNav active={screen} go={go} detail={screen === "detail"} />
